@@ -1,28 +1,29 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
-  modules: [
-    '@nuxt/eslint',
-    '@nuxt/ui'
-  ],
+    modules: [
+      '@nuxtjs/supabase',
+      'nuxt-quasar-ui',
+      '@pinia/nuxt',
+    ],
 
-  devtools: {
-    enabled: true
-  },
+    quasar: {
+      plugins: ['Notify', 'Dialog'],
+      extras: {
+        font: 'roboto-font',
+        fontIcons: ['material-icons'],
+      },
+      sassVariables: true,
+    },
 
-  css: ['~/assets/css/main.css'],
+    supabase: {
+      redirect: false,  // manejamos auth manualmente
+    },
 
-  routeRules: {
-    '/': { prerender: true }
-  },
-
-  compatibilityDate: '2025-01-15',
-
-  eslint: {
-    config: {
-      stylistic: {
-        commaDangle: 'never',
-        braceStyle: '1tbs'
+    runtimeConfig: {
+      public: {
+        siteUrl: process.env.SITE_URL || 'https://noticia-paisa.com',
       }
-    }
-  }
-})
+    },
+
+    ssr: true,
+  })
