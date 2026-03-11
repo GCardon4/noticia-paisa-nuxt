@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 
 export const useAuthStore = defineStore('auth', () => {
   // useSupabaseClient y useSupabaseUser son auto-importados por @nuxtjs/supabase
