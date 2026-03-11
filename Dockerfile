@@ -16,6 +16,7 @@ RUN npm install -g pnpm@10.28.2
 
 # Copiar archivos de dependencias primero (mejor cache de capas)
 COPY package.json pnpm-lock.yaml ./
+COPY patches/ ./patches/
 
 # Instalar dependencias (incluye nuxt prepare via postinstall)
 RUN pnpm install --frozen-lockfile
