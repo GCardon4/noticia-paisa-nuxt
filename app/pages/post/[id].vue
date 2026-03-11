@@ -157,6 +157,8 @@ const postId = route.params.id
 const postViews = ref(0)
 let viewsSubscription = null
 
+const siteUrl = useRuntimeConfig().public.siteUrl
+
 // Carga el post con SSR
 const { data: post, pending } = await useAsyncData(`post-${postId}`, async () => {
   const { data, error } = await supabase
@@ -171,26 +173,25 @@ const { data: post, pending } = await useAsyncData(`post-${postId}`, async () =>
   return { ...data, views: data.views_post?.[0]?.views || 0 }
 })
 
-// SEO con datos del post
-if (post.value) {
-  const siteUrl = useRuntimeConfig().public.siteUrl
-  const description = post.value.description?.substring(0, 155) || 'Lee esta noticia en Noticia Paisa'
-  const imageUrl = post.value.img_url || `${siteUrl}/icons/favicon-128x128.png`
+// SEO con datos del post — computed para SSR reactivo
+const seoTitle = computed(() => post.value?.name || 'Noticia Paisa')
+const seoDescription = computed(() => post.value?.description?.substring(0, 155) || 'Lee esta noticia en Noticia Paisa')
+const seoImage = computed(() => post.value?.img_url || `${siteUrl}/icons/favicon-128x128.png`)
+const seoUrl = computed(() => `${siteUrl}/post/${postId}`)
 
-  useSeoMeta({
-    title: post.value.name,
-    description,
-    ogTitle: post.value.name,
-    ogDescription: description,
-    ogImage: imageUrl,
-    ogUrl: `${siteUrl}/post/${postId}`,
-    ogType: 'article',
-    twitterCard: 'summary_large_image',
-    twitterTitle: post.value.name,
-    twitterDescription: description,
-    twitterImage: imageUrl,
-  })
-}
+useSeoMeta({
+  title: seoTitle,
+  description: seoDescription,
+  ogTitle: seoTitle,
+  ogDescription: seoDescription,
+  ogImage: seoImage,
+  ogUrl: seoUrl,
+  ogType: 'article',
+  twitterCard: 'summary_large_image',
+  twitterTitle: seoTitle,
+  twitterDescription: seoDescription,
+  twitterImage: seoImage,
+})
 
 const isAuthor = computed(() => authStore.user?.id === post.value?.autor)
 
@@ -243,8 +244,6 @@ const deletePost = () => {
     }
   })
 }
-
-const siteUrl = useRuntimeConfig().public.siteUrl
 
 const shareOnFacebook = () => {
   const url = `${siteUrl}/post/${postId}`

@@ -353,6 +353,10 @@ const $q = useQuasar()
 useSeoMeta({
   title: 'Noticia Paisa — Reportando para Vos',
   description: 'Noticias de Antioquia y el Área Metropolitana. Siempre Actualizados.',
+  ogType: 'website',
+  ogUrl: 'https://noticiapaisa.com',
+  ogImage: '/og-image.jpg',
+  twitterCard: 'summary_large_image'
 })
 
 const selectedTag = ref(null)
