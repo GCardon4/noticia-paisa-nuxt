@@ -176,15 +176,31 @@ const { data: post, pending } = await useAsyncData(`post-${postId}`, async () =>
 // SEO con datos del post — computed para SSR reactivo
 const seoTitle = computed(() => post.value?.name || 'Noticia Paisa')
 const seoDescription = computed(() => post.value?.description?.substring(0, 155) || 'Lee esta noticia en Noticia Paisa')
-const seoImage = computed(() => post.value?.img_url || `${siteUrl}/icons/favicon-128x128.png`)
+const seoImage = computed(() => post.value?.img_url || `${siteUrl}/og-default.jpg`)
 const seoUrl = computed(() => `${siteUrl}/post/${postId}`)
+
+// Detecta el tipo MIME según la extensión de la imagen
+const seoImageType = computed(() => {
+  const url = seoImage.value || ''
+  if (url.includes('.png')) return 'image/png'
+  if (url.includes('.webp')) return 'image/webp'
+  return 'image/jpeg'
+})
+
+// Si no hay imagen del post, usamos dimensiones conocidas del fallback (1200×630)
+const hasPostImage = computed(() => !!post.value?.img_url)
 
 useSeoMeta({
   title: seoTitle,
   description: seoDescription,
+  ogSiteName: 'Noticia Paisa',
   ogTitle: seoTitle,
   ogDescription: seoDescription,
   ogImage: seoImage,
+  ogImageSecureUrl: seoImage,
+  ogImageType: seoImageType,
+  ogImageWidth: hasPostImage.value ? undefined : 1200,
+  ogImageHeight: hasPostImage.value ? undefined : 630,
   ogUrl: seoUrl,
   ogType: 'article',
   twitterCard: 'summary_large_image',
