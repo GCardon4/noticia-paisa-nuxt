@@ -146,6 +146,7 @@
           class="card-post q-mb-md"
           bordered
           flat
+          v-intersection.once="(entry) => onCardVisible(entry, post.id)"
         >
           <!-- Header con avatar, nombre y opciones -->
           <q-item>
@@ -193,27 +194,33 @@
           <q-separator />
 
           <!-- Video del post -->
-          <div v-if="post.video_url" class="cursor-pointer relative-position" @click="viewPostDetail(post.id)">
-            <video :src="post.video_url" controls class="full-width" style="max-height: 500px; background-color: black;" preload="metadata">
-              Tu navegador no soporta el elemento de video.
-            </video>
-          </div>
+          <template v-if="post.video_url">
+            <div v-if="loadedMedia[post.id]" class="cursor-pointer relative-position" @click="viewPostDetail(post.id)">
+              <video :src="post.video_url" controls class="full-width post-media-fade" style="max-height: 500px; background-color: black;" preload="none">
+                Tu navegador no soporta el elemento de video.
+              </video>
+            </div>
+            <div v-else class="media-placeholder cursor-pointer" @click="viewPostDetail(post.id)" />
+          </template>
 
           <!-- Imagen del post -->
-          <q-img
-            v-else-if="post.img_url"
-            :src="post.img_url"
-            :ratio="16/9"
-            spinner-color="primary"
-            class="cursor-pointer"
-            @click="viewPostDetail(post.id)"
-          >
-            <template v-slot:error>
-              <div class="absolute-full flex flex-center bg-grey-3">
-                <q-icon name="broken_image" size="80px" color="grey-5" />
-              </div>
-            </template>
-          </q-img>
+          <template v-else-if="post.img_url">
+            <q-img
+              v-if="loadedMedia[post.id]"
+              :src="post.img_url"
+              :ratio="16/9"
+              spinner-color="primary"
+              class="cursor-pointer post-media-fade"
+              @click="viewPostDetail(post.id)"
+            >
+              <template v-slot:error>
+                <div class="absolute-full flex flex-center bg-grey-3">
+                  <q-icon name="broken_image" size="80px" color="grey-5" />
+                </div>
+              </template>
+            </q-img>
+            <div v-else class="media-placeholder cursor-pointer" @click="viewPostDetail(post.id)" />
+          </template>
 
           <!-- Contenido del post -->
           <q-card-section>
@@ -362,6 +369,13 @@ useSeoMeta({
 const selectedTag = ref(null)
 const selectedMunicipio = ref(null)
 const showAllMunicipios = ref(false)
+const loadedMedia = ref({})
+
+const onCardVisible = (entry, postId) => {
+  if (entry.isIntersecting) {
+    loadedMedia.value[postId] = true
+  }
+}
 
 const diaActual = computed(() => new Date().getDay())
 
@@ -558,6 +572,20 @@ const copyLink = async (post) => {
 
 .cursor-pointer:hover {
   opacity: 0.9;
+}
+
+.media-placeholder {
+  aspect-ratio: 16 / 9;
+  background: #f0f0f0;
+}
+
+.post-media-fade {
+  animation: fadeIn 0.35s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 @media (max-width: 768px) {

@@ -126,14 +126,15 @@
                   v-model="postData.newImage"
                   label="Nueva Imagen de la Noticia"
                   outlined
-                  accept="image/jpeg, image/png, image/webp"
-                  max-file-size="5242880"
+                  accept="image/jpeg, image/png, image/webp, image/gif"
+                  max-file-size="10485760"
                   @update:model-value="handleImageSelect"
                   @rejected="onFileRejected"
                   clearable
+                  :loading="processingImage"
                 >
                   <template v-slot:prepend><q-icon name="image" /></template>
-                  <template v-slot:hint>Formatos: JPG, PNG, WEBP. Tamaño máximo: 5MB</template>
+                  <template v-slot:hint>Formatos: JPG, PNG, WEBP, GIF. Se optimizará automáticamente a WebP (máx. 2000px)</template>
                 </q-file>
 
                 <div v-if="imagePreview" class="q-mt-md">
@@ -230,6 +231,7 @@ import { useAuthStore } from '~/stores/authStore'
 import { usePostStore } from '~/stores/postStore'
 import { useQuasar, date } from 'quasar'
 import { todosMunicipios, buscarMunicipio } from '~/data/municipios'
+import { useImageOptimizer } from '~/composable/useImageOptimizer'
 
 definePageMeta({ middleware: 'auth' })
 
@@ -237,10 +239,13 @@ const authStore = useAuthStore()
 const postStore = usePostStore()
 const route = useRoute()
 const $q = useQuasar()
+const { optimizeImage } = useImageOptimizer()
 
 const postId = route.params.id
 const cargando = ref(true)
 const imagePreview = ref(null)
+const processedImageFile = ref(null)
+const processingImage = ref(false)
 const videoPreview = ref(null)
 const videoInfo = ref(null)
 const currentImageUrl = ref(null)
@@ -318,13 +323,25 @@ onMounted(async () => {
 
 const formatDate = (dateString) => date.formatDate(dateString, 'D MMMM YYYY, h:mm A')
 
-const handleImageSelect = (file) => {
-  if (file) {
-    const reader = new FileReader()
-    reader.onload = (e) => { imagePreview.value = e.target.result }
-    reader.readAsDataURL(file)
-  } else {
+const handleImageSelect = async (file) => {
+  if (!file) {
     imagePreview.value = null
+    processedImageFile.value = null
+    return
+  }
+  processingImage.value = true
+  try {
+    const result = await optimizeImage(file)
+    processedImageFile.value = result.file
+    imagePreview.value = result.preview
+    const kb = Math.round(result.file.size / 1024)
+    $q.notify({ type: 'positive', message: `Imagen optimizada: ${kb} KB (WebP)`, position: 'top', timeout: 2000 })
+  } catch {
+    $q.notify({ type: 'negative', message: 'No se pudo procesar la imagen', position: 'top' })
+    processedImageFile.value = null
+    imagePreview.value = null
+  } finally {
+    processingImage.value = false
   }
 }
 
@@ -372,7 +389,7 @@ const onVideoRejected = () => {
 }
 
 const cancelImageChange = () => {
-  postData.newImage = null; imagePreview.value = null; showImageSelector.value = false
+  postData.newImage = null; imagePreview.value = null; processedImageFile.value = null; showImageSelector.value = false
 }
 
 const cancelVideoChange = () => {
@@ -389,7 +406,7 @@ const handleUpdatePost = async () => {
     lugar: postData.lugar,
     img_url: currentImageUrl.value,
     video_url: currentVideoUrl.value,
-    image: postData.newImage || undefined,
+    image: processedImageFile.value || postData.newImage || undefined,
     video: postData.newVideo || undefined,
   }
 

@@ -100,15 +100,16 @@
                   v-model="postData.image"
                   label="Imagen de la Noticia"
                   outlined
-                  accept="image/jpeg, image/png, image/webp"
-                  max-file-size="5242880"
+                  accept="image/jpeg, image/png, image/webp, image/gif"
+                  max-file-size="10485760"
                   @update:model-value="handleImageSelect"
                   @rejected="onFileRejected"
                   :rules="[val => !!val || 'La imagen es requerida']"
                   lazy-rules
+                  :loading="processingImage"
                 >
                   <template v-slot:prepend><q-icon name="image" /></template>
-                  <template v-slot:hint>Formatos: JPG, PNG, WEBP. Tamaño máximo: 5MB</template>
+                  <template v-slot:hint>Formatos: JPG, PNG, WEBP, GIF. Se optimizará automáticamente a WebP (máx. 2000px)</template>
                 </q-file>
 
                 <div v-if="imagePreview" class="q-mt-md">
@@ -198,14 +199,18 @@ import { useAuthStore } from '~/stores/authStore'
 import { usePostStore } from '~/stores/postStore'
 import { useQuasar } from 'quasar'
 import { todosMunicipios, buscarMunicipio } from '~/data/municipios'
+import { useImageOptimizer } from '~/composable/useImageOptimizer'
 
 definePageMeta({ middleware: 'auth' })
 
 const authStore = useAuthStore()
 const postStore = usePostStore()
 const $q = useQuasar()
+const { optimizeImage } = useImageOptimizer()
 
 const imagePreview = ref(null)
+const processedImageFile = ref(null)
+const processingImage = ref(false)
 const videoPreview = ref(null)
 const videoInfo = ref(null)
 const mediaType = ref('image')
@@ -243,13 +248,25 @@ const createTag = (val, done) => {
   }
 }
 
-const handleImageSelect = (file) => {
-  if (file) {
-    const reader = new FileReader()
-    reader.onload = (e) => { imagePreview.value = e.target.result }
-    reader.readAsDataURL(file)
-  } else {
+const handleImageSelect = async (file) => {
+  if (!file) {
     imagePreview.value = null
+    processedImageFile.value = null
+    return
+  }
+  processingImage.value = true
+  try {
+    const result = await optimizeImage(file)
+    processedImageFile.value = result.file
+    imagePreview.value = result.preview
+    const kb = Math.round(result.file.size / 1024)
+    $q.notify({ type: 'positive', message: `Imagen optimizada: ${kb} KB (WebP)`, position: 'top', timeout: 2000 })
+  } catch {
+    $q.notify({ type: 'negative', message: 'No se pudo procesar la imagen', position: 'top' })
+    processedImageFile.value = null
+    imagePreview.value = null
+  } finally {
+    processingImage.value = false
   }
 }
 
@@ -300,7 +317,7 @@ const handleCreatePost = async () => {
   const result = await postStore.createPost({
     name: postData.name,
     description: postData.description,
-    image: mediaType.value === 'image' ? postData.image : null,
+    image: mediaType.value === 'image' ? (processedImageFile.value || postData.image) : null,
     video: mediaType.value === 'video' ? postData.video : null,
     isPublic: postData.isPublic,
     tags: postData.tags,
@@ -317,6 +334,7 @@ const handleCreatePost = async () => {
     })
     Object.assign(postData, { name: '', description: '', image: null, video: null, isPublic: false, tags: [], municipio: null, lugar: '' })
     imagePreview.value = null; videoPreview.value = null; videoInfo.value = null; mediaType.value = 'image'
+    processedImageFile.value = null
     setTimeout(() => navigateTo('/'), 1000)
   } else {
     $q.notify({ type: 'negative', message: result.error || 'Error al crear la noticia', position: 'top', icon: 'error' })
