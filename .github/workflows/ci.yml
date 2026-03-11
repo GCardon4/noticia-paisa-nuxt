@@ -25,7 +25,14 @@ jobs:
           cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --ignore-scripts
+
+      - name: Prepare Nuxt
+        run: pnpm exec nuxt prepare
+        env:
+          SUPABASE_URL: https://placeholder.supabase.co
+          SUPABASE_KEY: placeholder_key
+          SITE_URL: https://noticia-paisa.com
 
       - name: Lint
         run: pnpm run lint
