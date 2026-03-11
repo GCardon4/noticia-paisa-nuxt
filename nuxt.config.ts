@@ -9,6 +9,7 @@ export default defineNuxtConfig({
       '@nuxtjs/supabase',
       'nuxt-quasar-ui',
       '@pinia/nuxt',
+      '@nuxt/eslint',
     ],
 
     quasar: {
