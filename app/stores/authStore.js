@@ -1,43 +1,23 @@
 import { defineStore } from 'pinia'
-import { supabase } from 'src/boot/supabase'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 export const useAuthStore = defineStore('auth', () => {
-  // Estado del usuario autenticado
-  const user = ref(null)
+  // useSupabaseClient y useSupabaseUser son auto-importados por @nuxtjs/supabase
+  const supabase = useSupabaseClient()
+  const user = useSupabaseUser()  // reactivo y SSR-aware, manejado por el módulo
+
   const loading = ref(false)
   const error = ref(null)
 
-  // Inicializa la sesión del usuario al cargar la aplicación
-  const initializeAuth = async () => {
-    // Solo ejecuta en el cliente, no en SSR
-    if (typeof window === 'undefined') {
-      return
-    }
-    
-    try {
-      loading.value = true
-      const { data: { session } } = await supabase.auth.getSession()
-      user.value = session?.user || null
-
-      // Escucha cambios en el estado de autenticación
-      supabase.auth.onAuthStateChange((event, session) => {
-        user.value = session?.user || null
-      })
-    } catch (err) {
-      error.value = err.message
-      console.error('Error al inicializar autenticación:', err)
-    } finally {
-      loading.value = false
-    }
-  }
+  // Verifica si el usuario está autenticado (compatible con llamadas como función)
+  const isAuthenticated = () => !!user.value
 
   // Inicia sesión con email y contraseña
   const login = async (email, password) => {
     try {
       loading.value = true
       error.value = null
-      
+
       const { data, error: loginError } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -45,7 +25,6 @@ export const useAuthStore = defineStore('auth', () => {
 
       if (loginError) throw loginError
 
-      user.value = data.user
       return { success: true, user: data.user }
     } catch (err) {
       error.value = err.message
@@ -65,9 +44,7 @@ export const useAuthStore = defineStore('auth', () => {
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: metadata
-        }
+        options: { data: metadata }
       })
 
       if (signUpError) throw signUpError
@@ -89,10 +66,9 @@ export const useAuthStore = defineStore('auth', () => {
       error.value = null
 
       const { error: logoutError } = await supabase.auth.signOut()
-      
+
       if (logoutError) throw logoutError
 
-      user.value = null
       return { success: true }
     } catch (err) {
       error.value = err.message
@@ -101,11 +77,6 @@ export const useAuthStore = defineStore('auth', () => {
     } finally {
       loading.value = false
     }
-  }
-
-  // Verifica si el usuario está autenticado
-  const isAuthenticated = () => {
-    return !!user.value
   }
 
   // Obtiene el perfil del usuario desde la tabla profiles
@@ -132,11 +103,10 @@ export const useAuthStore = defineStore('auth', () => {
     user,
     loading,
     error,
-    initializeAuth,
+    isAuthenticated,
     login,
     register,
     logout,
-    isAuthenticated,
     getUserProfile
   }
 })

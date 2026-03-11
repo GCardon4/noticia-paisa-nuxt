@@ -12,7 +12,6 @@
 
       <q-card-section>
         <q-form @submit="handleLogin" class="q-gutter-md">
-          <!-- Campo de correo electrónico -->
           <q-input
             v-model="email"
             type="email"
@@ -27,7 +26,6 @@
             </template>
           </q-input>
 
-          <!-- Campo de contraseña -->
           <q-input
             v-model="password"
             :type="showPassword ? 'text' : 'password'"
@@ -49,7 +47,6 @@
             </template>
           </q-input>
 
-          <!-- Mensaje de error -->
           <q-banner v-if="authStore.error" class="bg-negative text-white rounded-borders" dense>
             <template v-slot:avatar>
               <q-icon name="error" color="white" />
@@ -57,7 +54,6 @@
             {{ authStore.error }}
           </q-banner>
 
-          <!-- Botón de inicio de sesión -->
           <q-btn
             type="submit"
             label="Iniciar Sesión"
@@ -75,49 +71,33 @@
 
 <script setup>
 import { ref } from 'vue'
-import { useAuthStore } from 'src/stores/authStore'
-import { useRouter } from 'vue-router'
+import { useAuthStore } from '~/stores/authStore'
 import { useQuasar } from 'quasar'
 
+definePageMeta({ middleware: 'guest' })
+
 const authStore = useAuthStore()
-const router = useRouter()
 const $q = useQuasar()
 
-// Estado del formulario
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
 
-// Valida el formato del correo electrónico
-const isValidEmail = (email) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
-}
+const isValidEmail = (val) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)
 
-// Maneja el inicio de sesión
 const handleLogin = async () => {
   const result = await authStore.login(email.value, password.value)
-  
+
   if (result.success) {
-    $q.notify({
-      type: 'positive',
-      message: 'Sesión iniciada correctamente',
-      position: 'top'
-    })
-    
-    // Redirige a la página de crear post
-    router.push('/crear-post')
+    $q.notify({ type: 'positive', message: 'Sesión iniciada correctamente', position: 'top' })
+    navigateTo('/crear-post')
   } else {
-    $q.notify({
-      type: 'negative',
-      message: result.error || 'Error al iniciar sesión',
-      position: 'top'
-    })
+    $q.notify({ type: 'negative', message: result.error || 'Error al iniciar sesión', position: 'top' })
   }
 }
 </script>
 
-<style scoped lang="scss">
+<style scoped>
 .login-card {
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   border-radius: 12px;

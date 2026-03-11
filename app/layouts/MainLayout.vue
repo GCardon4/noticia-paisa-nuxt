@@ -210,7 +210,7 @@ function navigateTo(routeName) {
 
 </script>
 
-<style scoped lang="scss">
+<style scoped>
 .footer-content {
   max-width: 1200px;
   margin: 0 auto;
@@ -221,8 +221,10 @@ function navigateTo(routeName) {
   gap: 16px;
   justify-content: center;
   align-items: center;
-  
-  @media (min-width: 768px) {
+}
+
+@media (min-width: 768px) {
+  .social-links {
     justify-content: flex-end;
   }
 }
@@ -236,11 +238,11 @@ function navigateTo(routeName) {
   border-radius: 50%;
   background-color: rgba(255, 255, 255, 0.1);
   transition: all 0.3s ease;
-  
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    transform: translateY(-3px);
-  }
+}
+
+.social-link:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-3px);
 }
 
 .footer-icon {
