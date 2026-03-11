@@ -45,4 +45,8 @@ export default defineNuxtConfig({
     },
 
     ssr: true,
+
+    build: {
+      transpile: ['quasar'],
+    },
   })

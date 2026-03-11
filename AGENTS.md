@@ -8,6 +8,7 @@ Pagina Web pde noticias relacionadas con todo lo que pasa en el valle de aburrá
 -   No uses snake_case
 -   Trabajar todas las acciones y getters con stores, en la carpeta store
 -   Folder /stores, se cargan los nuevos stores creados
+-   Acciones de los Repositorios son manuales
 
 ## Características Implementadas
 
