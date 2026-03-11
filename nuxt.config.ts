@@ -1,12 +1,26 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
     compatibilityDate: '2025-03-10',
-    buildDir: '.nuxt',
 
     future: {
       compatibilityVersion: 4,
     },
+
+    hooks: {
+      async 'build:before'() {
+        const { mkdirSync, writeFileSync, existsSync } = await import('node:fs')
+        const { resolve } = await import('node:path')
+        const serverDist = resolve('.nuxt/dist/server')
+        mkdirSync(serverDist, { recursive: true })
+        const precomputedFile = resolve(serverDist, 'client.precomputed.mjs')
+        if (!existsSync(precomputedFile)) {
+          writeFileSync(precomputedFile, 'export default undefined')
+        }
+      }
+    },
+
     modules: [
+      '@nuxt/ui',
       '@nuxtjs/supabase',
       'nuxt-quasar-ui',
       '@pinia/nuxt',

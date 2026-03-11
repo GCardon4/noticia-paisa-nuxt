@@ -1,0 +1,18 @@
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 52a7a8ea701a3571611ddbf9e4101ab7163a0479..7a9fe2fa59fb9b2cb48ec2830f4862a94ec5e0dc 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -728,11 +728,11 @@ async function bundle(nuxt) {
+ 		});
+ 		nuxt.hook("server:devHandler", (h, options) => {
+ 			devMiddlewareHandler.set(defineEventHandler((event) => {
+-				if (options.cors(event.path)) {
++				if (options?.cors && options.cors(event.path)) {
+ 					if (handleCors(event, nuxt.options.devServer.cors)) return null;
+ 					setHeader(event, "Vary", "Origin");
+ 				}
+-				return h(event);
++				return h ? h(event) : undefined;
+ 			}));
+ 		});
+ 		nuxt.server = createDevServer(nitro);
