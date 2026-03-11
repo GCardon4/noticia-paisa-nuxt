@@ -49,4 +49,18 @@ export default defineNuxtConfig({
     build: {
       transpile: ['quasar'],
     },
+
+    vite: {
+      plugins: [
+        {
+          name: 'fix-quasar-virtual-resolution',
+          enforce: 'pre',
+          resolveId(id, importer) {
+            if (importer?.includes('__quasar') && id.startsWith('quasar/')) {
+              return this.resolve(id, process.cwd() + '/package.json', { skipSelf: true })
+            }
+          },
+        },
+      ],
+    },
   })

@@ -8,9 +8,9 @@
 
         <!-- Enlaces de navegación en desktop -->
         <div class="gt-sm">
-          <q-btn flat label="Noticias" @click="navigateTo('home')" />
-          <q-btn flat label="Quiénes Somos" @click="navigateTo('quienes-somos')" />
-          <q-btn flat label="Contacto" @click="navigateTo('contacto')" />
+          <q-btn flat label="Noticias" @click="goTo('/')" />
+          <q-btn flat label="Quiénes Somos" @click="goTo('/quienes-somos')" />
+          <q-btn flat label="Contacto" @click="goTo('/contacto')" />
         </div>
       </q-toolbar>
     </q-header>
@@ -21,7 +21,7 @@
 
         <!-- Enlaces para usuarios autenticados -->
         <template v-if="authStore.isAuthenticated()">
-          <q-item clickable v-ripple @click="navigateTo('home')">
+          <q-item clickable v-ripple @click="goTo('/')">
             <q-item-section avatar>
               <q-icon name="home" />
             </q-item-section>
@@ -30,7 +30,7 @@
             </q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('quienes-somos')">
+          <q-item clickable v-ripple @click="goTo('/quienes-somos')">
             <q-item-section avatar>
               <q-icon name="info" />
             </q-item-section>
@@ -39,7 +39,7 @@
             </q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('contacto')">
+          <q-item clickable v-ripple @click="goTo('/contacto')">
             <q-item-section avatar>
               <q-icon name="mail" />
             </q-item-section>
@@ -50,7 +50,7 @@
 
           <q-separator />
 
-          <q-item clickable v-ripple @click="navigateTo('crear-post')">
+          <q-item clickable v-ripple @click="goTo('/crear-post')">
             <q-item-section avatar>
               <q-icon name="add_circle" />
             </q-item-section>
@@ -63,7 +63,7 @@
 
         <!-- Enlaces para usuarios no autenticados -->
         <template v-else>
-          <q-item clickable v-ripple @click="navigateTo('home')">
+          <q-item clickable v-ripple @click="goTo('/')">
             <q-item-section avatar>
               <q-icon name="home" />
             </q-item-section>
@@ -72,7 +72,7 @@
             </q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('quienes-somos')">
+          <q-item clickable v-ripple @click="goTo('/quienes-somos')">
             <q-item-section avatar>
               <q-icon name="info" />
             </q-item-section>
@@ -81,7 +81,7 @@
             </q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple @click="navigateTo('contacto')">
+          <q-item clickable v-ripple @click="goTo('/contacto')">
             <q-item-section avatar>
               <q-icon name="phone" />
             </q-item-section>
@@ -92,7 +92,7 @@
 
           <q-separator />
 
-          <q-item clickable v-ripple @click="navigateTo('login')">
+          <q-item clickable v-ripple @click="goTo('/login')">
             <q-item-section avatar>
               <q-icon name="login" />
             </q-item-section>
@@ -105,7 +105,7 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <NuxtPage />
     </q-page-container>
 
     <q-footer class="bg-primary text-white">
@@ -187,27 +187,22 @@
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useAuthStore } from 'src/stores/authStore'
-import { useRouter } from 'vue-router'
+import { useAuthStore } from '~/stores/authStore'
 
 const authStore = useAuthStore()
-const router = useRouter()
 
 const leftDrawerOpen = ref(false)
 
-// Obtiene el año actual para el copyright
 const currentYear = computed(() => new Date().getFullYear())
 
-// Alterna el drawer lateral
 function toggleLeftDrawer() {
   leftDrawerOpen.value = !leftDrawerOpen.value
 }
 
-function navigateTo(routeName) {
-  router.push({ name: routeName })
+function goTo(path) {
+  navigateTo(path)
   leftDrawerOpen.value = false
 }
-
 </script>
 
 <style scoped>
