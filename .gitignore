@@ -9,6 +9,10 @@ dist
 # Node dependencies
 node_modules
 
+# Lock files de otros gestores (este proyecto usa pnpm)
+package-lock.json
+yarn.lock
+
 # Logs
 logs
 *.log
