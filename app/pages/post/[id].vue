@@ -176,19 +176,18 @@ const { data: post, pending } = await useAsyncData(`post-${postId}`, async () =>
 // SEO con datos del post — computed para SSR reactivo
 const seoTitle = computed(() => post.value?.name || 'Noticia Paisa')
 const seoDescription = computed(() => post.value?.description?.substring(0, 155) || 'Lee esta noticia en Noticia Paisa')
-const seoImage = computed(() => post.value?.img_url || `${siteUrl}/og-default.jpg`)
 const seoUrl = computed(() => `${siteUrl}/post/${postId}`)
 
-// Detecta el tipo MIME según la extensión de la imagen
-const seoImageType = computed(() => {
-  const url = seoImage.value || ''
-  if (url.includes('.png')) return 'image/png'
-  if (url.includes('.webp')) return 'image/webp'
-  return 'image/jpeg'
+// Imagen OG: transforma imágenes de Supabase a JPEG 1200×630 para máxima compatibilidad con WhatsApp
+const seoImage = computed(() => {
+  const img = post.value?.img_url
+  if (!img) return `${siteUrl}/og-default.jpg`
+  // Usa el render endpoint de Supabase para estandarizar formato y dimensiones
+  if (img.includes('/storage/v1/object/public/')) {
+    return img.replace('/storage/v1/object/public/', '/storage/v1/render/image/public/') + '?width=1200&height=630&resize=cover&format=origin'
+  }
+  return img
 })
-
-// Si no hay imagen del post, usamos dimensiones conocidas del fallback (1200×630)
-const hasPostImage = computed(() => !!post.value?.img_url)
 
 useSeoMeta({
   title: seoTitle,
@@ -198,9 +197,9 @@ useSeoMeta({
   ogDescription: seoDescription,
   ogImage: seoImage,
   ogImageSecureUrl: seoImage,
-  ogImageType: seoImageType,
-  ogImageWidth: () => hasPostImage.value ? undefined : 1200,
-  ogImageHeight: () => hasPostImage.value ? undefined : 630,
+  ogImageType: 'image/jpeg',
+  ogImageWidth: 1200,
+  ogImageHeight: 630,
   ogUrl: seoUrl,
   ogType: 'article',
   twitterCard: 'summary_large_image',
