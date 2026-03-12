@@ -8,6 +8,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const loading = ref(false)
   const error = ref(null)
+  const profile = ref(null)
 
   // Verifica si el usuario está autenticado (compatible con llamadas como función)
   const isAuthenticated = () => !!user.value
@@ -92,6 +93,14 @@ export const useAuthStore = defineStore('auth', () => {
 
       if (profileError) throw profileError
 
+      if (data?.avatar_url && !data.avatar_url.startsWith('http')) {
+        const { data: urlData } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(data.avatar_url)
+        data.avatar_url = urlData.publicUrl
+      }
+
+      profile.value = data
       return data
     } catch (err) {
       console.error('Error al obtener perfil:', err)
@@ -101,6 +110,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   return {
     user,
+    profile,
     loading,
     error,
     isAuthenticated,

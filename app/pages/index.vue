@@ -39,20 +39,7 @@
           <q-card class="bg-white q-mb-md placa-card-taxis" flat bordered>
             <q-card-section class="text-center">
               <div class="text-h6 text-weight-bold text-black">🚕 Pico y Placa Taxis</div>
-              <div class="text-subtitle1 text-black q-mb-sm">Hoy {{ nombreDia }}</div>
-
-              <div v-if="picoPlacaTaxis !== null" class="text-h3 text-weight-bold text-black q-mt-sm q-mb-md">
-                {{ picoPlacaTaxis }}
-              </div>
-              <div v-else class="text-h6 text-grey-7 q-mt-sm q-mb-md">
-                No hay restricción
-              </div>
-
-              <div v-if="picoPlacaTaxis !== null" class="q-mt-md">
-                <div class="text-caption text-weight-medium text-black">
-                  Aplica para el último número de la placa
-                </div>
-              </div>
+              <img src="/pico-placa-taxis.jpeg" alt="Pico y Placa Taxis" class="full-width q-mt-sm" />
             </q-card-section>
           </q-card>
         </div>
@@ -292,7 +279,8 @@
           <q-item v-if="authStore.user">
             <q-item-section avatar>
               <q-avatar size="48px" color="primary" text-color="white">
-                <q-icon name="person" />
+                <img v-if="authStore.profile?.avatar_url" :src="authStore.profile.avatar_url" />
+                <q-icon v-else name="person" />
               </q-avatar>
             </q-item-section>
             <q-item-section>
@@ -386,42 +374,17 @@ const nombreDia = computed(() => {
 
 const numerosPicoPlaca = computed(() => {
   const picoPlacaPorDia = {
-    1: '6 - 9',
-    2: '5 - 7',
-    3: '1 - 8',
-    4: '0 - 2',
-    5: '3 - 4',
+    1: '1 - 7',
+    2: '0 - 3',
+    3: '4 - 6',
+    4: '5 - 9',
+    5: '2 - 8',
     6: null,
     0: null
   }
   return picoPlacaPorDia[diaActual.value]
 })
 
-const picoPlacaTaxis = computed(() => {
-  const hoy = new Date()
-  const mes = hoy.getMonth() + 1
-  const dia = hoy.getDate()
-  const anio = hoy.getFullYear()
-
-  const cronogramaEnero = {
-    6: 0, 20: 0,
-    7: 1, 21: 1,
-    15: 2, 29: 2,
-    16: 3, 30: 3,
-    2: 4, 19: 4,
-    13: 5, 27: 5,
-    14: 6, 28: 6,
-    8: 7, 22: 7,
-    9: 8, 23: 8,
-    5: 9, 26: 9
-  }
-
-  if (anio === 2026 && mes === 1) {
-    return cronogramaEnero[dia] !== undefined ? cronogramaEnero[dia] : null
-  }
-
-  return null
-})
 
 const allTags = computed(() => {
   const tags = new Set()
@@ -468,7 +431,10 @@ onMounted(async () => {
   // Recarga en cliente para garantizar datos frescos
   await postStore.fetchPublicPosts()
   if (authStore.user) {
-    await postStore.fetchUserPosts()
+    await Promise.all([
+      postStore.fetchUserPosts(),
+      authStore.getUserProfile()
+    ])
   }
 })
 
