@@ -141,7 +141,7 @@ useSeoMeta({
 })
 
 const redesSociales = [
-  { nombre: 'Facebook', handle: '@noticiapaisa', url: 'https://www.facebook.com/noticiapaisa/', icon: '/social-icons/icon-facebook-white.svg', bgColor: 'bg-blue-6' },
+  { nombre: 'Facebook', handle: '@noticiapaisa', url: 'https://www.facebook.com/groups/835338216798589/user/61565454885470', icon: '/social-icons/icon-facebook-white.svg', bgColor: 'bg-blue-6' },
   { nombre: 'Instagram', handle: '@noticiapaisaoficial', url: 'https://www.instagram.com/noticiapaisaoficial/', icon: '/social-icons/icon-instagram-white.svg', bgColor: 'bg-pink-6' },
   { nombre: 'YouTube', handle: '@noticiapaisa', url: 'https://www.youtube.com/@noticiapaisa', icon: '/social-icons/icon-youtube-white.svg', bgColor: 'bg-red-6' },
   { nombre: 'Telegram', handle: '@noticiapaisaoficial1', url: 'https://t.me/noticiapaisaoficial1', icon: '/social-icons/icon-telegram-white.svg', bgColor: 'bg-blue-4' },
