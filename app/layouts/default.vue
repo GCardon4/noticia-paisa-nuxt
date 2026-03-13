@@ -93,7 +93,7 @@
           <div class="col-12 col-md-6 text-center text-md-right">
             <div class="text-caption q-mb-sm">Síguenos en redes sociales</div>
             <div class="social-links">
-              <a href="https://www.facebook.com/noticiapaisa/" target="_blank" rel="noopener noreferrer" class="social-link">
+              <a href="https://www.facebook.com/groups/835338216798589/user/61565454885470" target="_blank" rel="noopener noreferrer" class="social-link">
                 <img src="/social-icons/icon-facebook-white.svg" alt="Facebook" class="footer-icon"/>
               </a>
               <a href="https://www.instagram.com/noticiapaisaoficial/" target="_blank" rel="noopener noreferrer" class="social-link">
