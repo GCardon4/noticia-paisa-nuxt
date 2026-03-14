@@ -21,12 +21,11 @@
           <q-item>
             <q-item-section avatar>
               <q-avatar size="56px" color="primary" text-color="white">
-                <img v-if="post.profiles?.avatar_url" :src="post.profiles.avatar_url" />
-                <q-icon v-else name="person" />
+                <img :src="post.profiles?.avatar_url || '/og-default.jpg'" />
               </q-avatar>
             </q-item-section>
             <q-item-section>
-              <q-item-label class="text-bold text-h6">{{ post.profiles?.full_name || 'Usuario' }}</q-item-label>
+              <q-item-label class="text-bold text-h6">{{ post.profiles?.full_name || 'Noticia Paisa' }}</q-item-label>
               <q-item-label caption class="text-subtitle2">{{ formatDate(post.created_at) }}</q-item-label>
             </q-item-section>
 

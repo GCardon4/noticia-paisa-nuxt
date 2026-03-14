@@ -139,8 +139,7 @@
           <q-item>
             <q-item-section avatar>
               <q-avatar color="primary" text-color="white">
-                <img v-if="getAuthorAvatar(post)" :src="getAuthorAvatar(post)" />
-                <q-icon v-else name="person" />
+                <img :src="getAuthorAvatar(post)" />
               </q-avatar>
             </q-item-section>
 
@@ -440,8 +439,8 @@ onMounted(async () => {
 
 const formatDate = (dateString) => date.formatDate(dateString, 'D MMMM YYYY, h:mm A')
 
-const getAuthorName = (post) => post.profiles?.full_name || 'Usuario'
-const getAuthorAvatar = (post) => post.profiles?.avatar_url || null
+const getAuthorName = (post) => post.profiles?.full_name || 'Noticia Paisa'
+const getAuthorAvatar = (post) => post.profiles?.avatar_url || '/og-default.jpg'
 const isAuthor = (autorId) => authStore.user?.id === autorId
 
 const getExcerpt = (description, maxLength = 150) => {
