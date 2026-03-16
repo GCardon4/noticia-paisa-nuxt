@@ -143,13 +143,11 @@
 <script setup>
 import { computed, ref, onMounted, onUnmounted } from 'vue'
 import { usePostStore } from '~/stores/postStore'
-import { useAuthStore } from '~/stores/authStore'
 import { useQuasar, date } from 'quasar'
 
 const route = useRoute()
 const $q = useQuasar()
 const postStore = usePostStore()
-const authStore = useAuthStore()
 const supabase = useSupabaseClient()
 
 const postId = route.params.id
