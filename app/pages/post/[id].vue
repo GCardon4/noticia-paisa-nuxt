@@ -9,7 +9,7 @@
         </div>
 
         <!-- Error state -->
-        <div v-else-if="!post" class="text-center q-pa-xl">
+        <div v-else-if="!post || (!post.is_public && !isAuthor)" class="text-center q-pa-xl">
           <q-icon name="error_outline" size="80px" color="grey-5" />
           <div class="text-h6 text-grey-7 q-mt-md">No se encontró la noticia</div>
           <q-btn label="Volver al inicio" color="primary" class="q-mt-md" @click="navigateTo('/')" unelevated />
@@ -164,7 +164,6 @@ const { data: post, pending } = await useAsyncData(`post-${postId}`, async () =>
     .from('posts')
     .select(`*, profiles!autor(full_name, avatar_url), views_post(views)`)
     .eq('id', postId)
-    .eq('is_public', true)
     .single()
 
   if (error || !data) return null
