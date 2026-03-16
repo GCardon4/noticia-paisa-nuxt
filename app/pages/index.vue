@@ -105,7 +105,7 @@
           </q-card-section>
         </q-card>
 
-        <!-- Loading state -->
+<!-- Loading state -->
         <div v-if="postStore.loading" class="text-center q-pa-xl">
           <q-spinner-dots color="primary" size="50px" />
           <div class="text-grey-7 q-mt-md">Cargando noticias...</div>
@@ -117,7 +117,7 @@
           <div class="text-h6 text-grey-7 q-mt-md">No hay noticias publicadas</div>
           <div class="text-body2 text-grey-6 q-mt-sm">Sé el primero en publicar una noticia</div>
           <q-btn
-            v-if="currentUser"
+            v-if="myUserId"
             label="Crear Noticia"
             color="primary"
             class="q-mt-md"
@@ -276,7 +276,7 @@
       <!-- Sidebar -->
       <div class="col-4 large-screen-only">
         <q-card class="fixed" style="width: 300px;">
-          <q-item v-if="currentUser">
+          <q-item v-if="myUserId">
             <q-item-section avatar>
               <q-avatar size="48px" color="primary" text-color="white">
                 <img v-if="authStore.profile?.avatar_url" :src="authStore.profile.avatar_url" />
@@ -284,14 +284,14 @@
               </q-avatar>
             </q-item-section>
             <q-item-section>
-              <q-item-label class="text-bold">{{ authStore.profile?.full_name || currentUser.email }}</q-item-label>
+              <q-item-label class="text-bold">{{ authStore.profile?.full_name || authStore.user?.email }}</q-item-label>
               <q-item-label caption>Noticia Paisa</q-item-label>
             </q-item-section>
           </q-item>
 
-          <q-separator v-if="currentUser" />
+          <q-separator v-if="myUserId" />
 
-          <q-card-section v-if="currentUser">
+          <q-card-section v-if="myUserId">
             <div class="text-caption text-grey-7 q-mb-sm">Estadísticas</div>
             <div class="row q-col-gutter-sm">
               <div class="col-6">
@@ -305,11 +305,11 @@
             </div>
           </q-card-section>
 
-          <q-separator v-if="currentUser" />
+          <q-separator v-if="myUserId" />
 
           <q-card-actions>
             <q-btn
-              v-if="currentUser"
+              v-if="myUserId"
               label="Crear Noticia"
               color="primary"
               class="full-width"
@@ -336,14 +336,15 @@
 </template>
 
 <script setup>
-import { onMounted, computed, ref, watch } from 'vue'
+import { onMounted, computed, ref } from 'vue'
 import { usePostStore } from '~/stores/postStore'
 import { useAuthStore } from '~/stores/authStore'
 import { useQuasar, date } from 'quasar'
 
 const postStore = usePostStore()
 const authStore = useAuthStore()
-const currentUser = useSupabaseUser()
+const supabase = useSupabaseClient()
+const myUserId = ref(null)
 const $q = useQuasar()
 
 useSeoMeta({
@@ -430,15 +431,16 @@ if (ssrPosts.value) {
 
 const loadUserData = async (userId) => {
   if (!userId) return
-  const [, draftsResult] = await Promise.all([
-    authStore.getUserProfile(),
-    useSupabaseClient()
+  const [profileResult, draftsResult] = await Promise.all([
+    supabase.from('profiles').select('*').eq('id', userId).single(),
+    supabase
       .from('posts')
       .select(`*, profiles!autor(full_name, avatar_url), views_post(views)`)
       .eq('autor', userId)
       .eq('is_public', false)
       .order('created_at', { ascending: false })
   ])
+  if (profileResult.data) authStore.profile = profileResult.data
   const drafts = (draftsResult.data || []).map(p => ({ ...p, views: p.views_post?.[0]?.views || 0 }))
   if (drafts.length) {
     const existingIds = new Set(postStore.posts.map(p => p.id))
@@ -447,26 +449,24 @@ const loadUserData = async (userId) => {
 }
 
 onMounted(async () => {
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) myUserId.value = user.id
+
   await postStore.fetchPublicPosts()
-  if (currentUser.value) {
-    await loadUserData(currentUser.value.id)
+
+  if (myUserId.value) {
+    await loadUserData(myUserId.value)
   }
 })
-
-// Cuando Supabase restaura la sesión después del SSR (post-hydration)
-watch(currentUser, (user) => {
-  if (user) loadUserData(user.id)
-}, { immediate: false })
 
 const formatDate = (dateString) => date.formatDate(dateString, 'D MMMM YYYY, h:mm A')
 
 const getAuthorName = (post) => post.profiles?.full_name || 'Noticia Paisa'
 const getAuthorAvatar = (post) => post.profiles?.avatar_url || '/og-default.jpg'
-const currentUserId = computed(() => currentUser.value?.id ?? null)
-const isAuthor = (autorId) => !!(currentUserId.value && currentUserId.value === autorId)
+const isAuthor = (autorId) => !!(myUserId.value && myUserId.value === autorId)
 const myPostsCount = computed(() => {
-  if (!currentUserId.value) return 0
-  return postStore.posts.filter(p => p.autor === currentUserId.value).length
+  if (!myUserId.value) return 0
+  return postStore.posts.filter(p => p.autor === myUserId.value).length
 })
 
 const getExcerpt = (description, maxLength = 150) => {

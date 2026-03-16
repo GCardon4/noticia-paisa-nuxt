@@ -237,6 +237,7 @@ definePageMeta({ middleware: 'auth' })
 
 const authStore = useAuthStore()
 const postStore = usePostStore()
+const supabase = useSupabaseClient()
 const route = useRoute()
 const $q = useQuasar()
 const { optimizeImage } = useImageOptimizer()
@@ -292,12 +293,15 @@ onMounted(async () => {
     return
   }
 
+  const { data: { user } } = await supabase.auth.getUser()
+  const currentUserId = user?.id
+
   const result = await postStore.fetchPostById(postId)
 
   if (result.success && result.data) {
     const post = result.data
 
-    if (post.autor !== authStore.user?.id) {
+    if (post.autor !== currentUserId) {
       $q.notify({ type: 'negative', message: 'No tienes permiso para editar este post', position: 'top' })
       navigateTo('/')
       return

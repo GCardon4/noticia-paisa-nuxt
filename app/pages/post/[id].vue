@@ -206,10 +206,14 @@ useSeoMeta({
   twitterImage: seoImage,
 })
 
-const isAuthor = computed(() => authStore.user?.id === post.value?.autor)
+const myUserId = ref(null)
+const isAuthor = computed(() => myUserId.value && myUserId.value === post.value?.autor)
 
 onMounted(async () => {
   if (postId) {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) myUserId.value = user.id
+
     // Sincroniza con el store
     if (post.value) postStore.currentPost = post.value
 
