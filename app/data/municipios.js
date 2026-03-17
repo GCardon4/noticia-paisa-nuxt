@@ -74,7 +74,11 @@ export const municipiosAntioquia = {
     'Caucasia',
     'Segovia',
     'Remedios',
-    'Yondó'
+    'Yondó',
+    'El Bagre',
+    'Nechí',
+    'Tarazá',
+    'Zaragoza'
   ]
 }
 

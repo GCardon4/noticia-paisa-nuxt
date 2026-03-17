@@ -218,7 +218,7 @@ const filteredMunicipios = ref(todosMunicipios)
 
 const availableTags = ref([
   'Noticias Locales', 'Noticias Nacionales', 'Noticias Internacionales',
-  'Deportes', 'Cultura', 'Tecnología', 'Política', 'Economía',
+  'Deportes', 'Cultura', 'Tecnología', 'Política', 'Economía', 'Protesta Social', 'Paro Nacional', 'Manifestación', 'Movilización', 'Plantón', 'Bloqueo', 'Huelga',
   'Salud', 'Movilidad', 'Seguridad', 'Entretenimiento', 'Educación', 'Medio Ambiente'
 ])
 
