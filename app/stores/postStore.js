@@ -193,7 +193,9 @@ export const usePostStore = defineStore('post', () => {
   // Crea un nuevo post en Supabase
   const createPost = async (postData) => {
     try {
-      if (!user.value) throw new Error('Usuario no autenticado')
+      // Obtener el usuario directamente desde la sesión activa (más confiable que el ref reactivo)
+      const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser()
+      if (authError || !currentUser) throw new Error('Usuario no autenticado')
 
       loading.value = true
       error.value = null
@@ -218,7 +220,7 @@ export const usePostStore = defineStore('post', () => {
         .insert([{
           name: postData.name,
           description: postData.description,
-          autor: user.value.id,
+          autor: currentUser.id,
           img_url: imageUrl,
           video_url: videoUrl,
           is_public: postData.isPublic || false,
