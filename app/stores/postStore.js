@@ -248,7 +248,9 @@ export const usePostStore = defineStore('post', () => {
   // Actualiza un post existente
   const updatePost = async (postId, updates) => {
     try {
-      if (!user.value) throw new Error('Usuario no autenticado')
+      // Obtener el usuario directamente desde la sesión activa (más confiable que el ref reactivo)
+      const { data: { user: currentUser }, error: authError } = await supabase.auth.getUser()
+      if (authError || !currentUser) throw new Error('Usuario no autenticado')
 
       loading.value = true
       error.value = null
@@ -281,7 +283,7 @@ export const usePostStore = defineStore('post', () => {
           lugar: updates.lugar || null
         })
         .eq('id', postId)
-        .eq('autor', user.value.id)
+        .eq('autor', currentUser.id)
         .select()
         .single()
 
